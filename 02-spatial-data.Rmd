@@ -180,6 +180,28 @@ We will use the `world` dataset provided by the **spData**, loaded at the beginn
 names(world)
 ```
 
+```{r}
+world %>% str # sf and dataframe
+world$geom # a geometry set
+world[0] # a sfc (simple feature collection)
+world[0] %>% str # sf and dataframe
+world$geom %>% plot
+world[0] %>% plot
+world[0] %>% all.equal(world$geom) # NOPE
+world$geom %>% str # sfc_MULTIPOLYGON
+world$geom %>% summary
+world$geom[1] %>% str
+world$geom[15] %>% str
+world$geom[1]
+world$geom[[1]]
+world$geom[[1]] %>% str
+world$geom[[15]] %>% str
+world$geom[[1]] %>% plot
+world[15,]
+world[15:18, 1:4] %>% plot
+```
+
+
 The contents of this `geom` column give `sf` objects their spatial powers: `world$geom` is a '[list column](https://jennybc.github.io/purrr-tutorial/ls13_list-columns.html)' that contains all the coordinates of the country polygons.
 The **sf** package provides a `plot()` method for visualizing geographic data:
 the following command creates Figure \@ref(fig:world-all).
@@ -197,6 +219,11 @@ The commonly used `summary()` function, for example, provides a useful overview 
 ```{r 02-spatial-data-9}
 summary(world["lifeExp"])
 ```
+
+```{r}
+world %>%  summary
+```
+
 
 Although we have only selected one variable for the `summary` command, it also outputs a report on the geometry.
 This demonstrates the 'sticky' behavior of the geometry columns of **sf** objects, meaning the geometry is kept unless the user deliberately removes them, as we'll see in Section \@ref(vector-attribute-manipulation).
@@ -269,11 +296,25 @@ world_sp = as(world, Class = "Spatial")
 # sp functions ...
 ```
 
+```{r}
+world_sp %>% summary
+```
+
+
 `Spatial` objects can be converted back to `sf` in the same way or with `st_as_sf()`:
 
 ```{r 02-spatial-data-13, eval=FALSE}
 world_sf = st_as_sf(world_sp, "sf")
 ```
+
+```{r}
+world_sf %>% names
+library(tidyverse)
+world_sf %>% 
+  rename(geom = geometry) %>% 
+  all.equal(world) # TRUE
+```
+
 
 ### Basic map making {#basic-map}
 
@@ -303,6 +344,7 @@ Note that the first plot must only have one facet for `add = TRUE` to work.
 If the first plot has a key, `reset = FALSE` must be used (result not shown):
 
 ```{r asia, out.width='50%', fig.cap="A plot of Asia added as a layer on top of countries worldwide.", eval=FALSE}
+X11()
 plot(world["pop"], reset = FALSE)
 plot(asia, add = TRUE, col = "red")
 ```
@@ -424,6 +466,11 @@ plot(st_as_sfc("MULTILINESTRING ((1 5, 4 4, 4 1, 2 2, 3 2), (1 2, 2 4))"), axes 
 plot(st_as_sfc("MULTIPOLYGON (((1 5, 2 2, 4 1, 4 4, 1 5), (0 2, 1 2, 1 3, 0 3, 0 2)))"), col = "gray", axes = TRUE, main = "MULTIPOLYGON")
 par(old_par)
 ```
+
+```{r}
+plot(st_as_sfc("MULTIPOLYGON (((1 5, 2 2, 4 1, 4 4, 1 5), (0 2, 1 2, 1 3, 0 3, 0 2), ((1 5, 2 2, 4 1, 4 4, 1 5), (2 4, 3 4, 3 3, 2 3, 2 4))))"), col = "gray", axes = TRUE, main = "MULTIPOLYGON with hole")
+```
+
 
 Finally, a geometry collection can contain any combination of geometries including (multi)points and linestrings (see Figure \@ref(fig:geomcollection)):
 
@@ -602,6 +649,11 @@ points_sfc_wgs = st_sfc(point1, point2, crs = 4326)
 st_crs(points_sfc_wgs)
 ```
 
+```{r}
+points_sfc_wgs
+```
+
+
 It also accepts a raw proj4string (result not shown):
 
 ```{r 02-spatial-data-31, eval=FALSE}
@@ -764,10 +816,23 @@ new_raster
 Dedicated functions report each component: `dim(new_raster)` returns the number of rows, columns and layers; the `ncell()` function the number of cells (pixels); `res()` the raster's spatial resolution; `extent()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reprojecting-raster-geometries)).
 `inMemory()` reports whether the raster data is stored in memory (the default) or on disk.
 
+```{r}
+nrow(new_raster)
+ncol(new_raster)
+dim(new_raster)
+ncell(new_raster)
+457*465
+extent(new_raster)
+crs(new_raster)
+res(new_raster)
+inMemory(new_raster) #FALSE
+```
+
+
 <!--CRSargs(CRS("+init=epsg:4326"))-->
 <!-- Note that in contrast to the **sf** package, **raster** only accepts the `proj4string` representation of the coordinate reference system. -->
 
-<!--
+
 You can also summarize and plot raster cell values in a non-spatial fashion using base R functions such as `summary()` and `hist()`.
 
 ```{r 02-spatial-data-39}
@@ -789,7 +854,7 @@ head(new_raster_values)
 ```
 
 The new vector, `new_raster_values`, can serve as input for subsequent statistical operations.
--->
+
 
 `help("raster-package")` returns a full list of all available **raster** functions.
 
@@ -975,6 +1040,11 @@ Available datum definitions can be seen by executing `st_proj_info(type = "datum
 <!-- plots? -->
 <!-- plus maybe table (few examples) -->
 
+```{r}
+st_proj_info(type = "datum")
+```
+
+
 ### Projected coordinate reference systems 
 
 Projected CRSs are based on Cartesian coordinates on an implicitly flat surface.
@@ -1004,6 +1074,11 @@ It is typically used in mapping polar regions.
 <!-- maybe a new section - how to pick the best projection? -->
 <!-- https://source.opennews.org/articles/choosing-right-map-projection/ -->
 
+```{r}
+st_proj_info(type = "proj")
+```
+
+
 ### CRSs in R {#crs-in-r}
 
 Two main ways to describe CRS in R are an `epsg` code or a `proj4string` definition.
@@ -1020,6 +1095,13 @@ This also makes the `proj4string` approach more complicated.
 
 Spatial R packages support a wide range of CRSs and they use the long-established [PROJ](http://proj4.org/) library.
 Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections.
+
+```{r}
+rgdal::make_EPSG() %>% 
+  filter(code %in% c(4326, 31370))
+```
+
+
 Before going into more detail, it's worth learning how to view and filter them inside R, as this could save time trawling the internet.
 The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example):
 
@@ -1052,6 +1134,15 @@ new_vector = st_set_crs(new_vector, 4326) # set CRS
 ```
 
 The warning message informs us that the `st_set_crs()` function does not transform data from one CRS to another.
+
+```{r}
+new_vector %>% str
+```
+
+```{r}
+plot(new_vector[0])
+```
+
 
 ```{r vector-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type.", message=FALSE, fig.asp=0.56, fig.scap="Examples of geographic and projected CRSs (vector data)."}
 # source("https://github.com/Robinlovelace/geocompr/raw/master/code/02-vector-crs.R")
@@ -1167,7 +1258,24 @@ Find two similarities and two differences between the image on your computer and
 <!-- raster exercises -->
 1. Create an empty `RasterLayer` object called `my_raster` with 10 columns and 10 rows.
 Assign random values between 0 and 10 to the new raster and plot it.
+
+```{r}
+my_raster <- 
+  raster(nrow = 10,
+         ncol = 10)
+my_raster
+values(my_raster) <- runif(n = 100, 0, 10)
+plot(my_raster)
+```
+
+
 1. Read-in the `raster/nlcd2011.tif` file from the **spDataLarge** package. 
 What kind of information can you get about the properties of this file?
+
+```{r}
+nlcd <- raster(system.file("raster/nlcd2011.tif", package = "spDataLarge"))
+nlcd
+```
+
 
 Reminder: solutions can be found online at https://geocompr.github.io
