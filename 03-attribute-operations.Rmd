@@ -612,6 +612,13 @@ See the Data structures chapter of @wickham_advanced_2014 for further details on
 
 `raster` objects represent categorical variables as integers, so `grain[1, 1]` returns a number that represents a unique identifier, rather than "clay", "silt" or "sand". 
 The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes`, which can be viewed with `ratify(grain)` (see `?ratify()` for more information).
+
+```{r}
+grain
+grain@data@attributes[[1]]
+levels(grain)[[1]]
+```
+
 Use the function `levels()` for retrieving and adding new factor levels to the attribute table:
 
 ```{r 03-attribute-operations-56}
@@ -689,6 +696,11 @@ Printing a raster object to the console by typing its name returns minimum and m
 `summary()` provides common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
 Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with `cellStats()`. 
 
+```{r}
+elev %>% summary
+```
+
+
 ```{r 03-attribute-operations-62, eval = FALSE}
 cellStats(elev, sd)
 ```
@@ -696,6 +708,11 @@ cellStats(elev, sd)
 ```{block2 03-attribute-operations-63, type='rmdnote'}
 If you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running: `summary(brick(elev, grain))`.
 ```
+
+```{r}
+summary(brick(elev, grain))
+```
+
 
 Raster value statistics can be visualized in a variety of ways.
 Specific functions such as `boxplot()`, `density()`, `hist()` and `pairs()` work also with raster objects, as demonstrated in the histogram created with the command below (not shown):
