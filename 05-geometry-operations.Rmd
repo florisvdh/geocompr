@@ -214,6 +214,8 @@ The **sf** package implements affine transformation for objects of classes `sfg`
 
 ```{r 05-geometry-operations-11}
 nz_sfc = st_geometry(nz)
+nz$geom %>% all.equal(nz_sfc) # TRUE
+nz[0]
 ```
 
 Shifting moves every point by the same distance in map units.
