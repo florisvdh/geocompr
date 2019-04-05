@@ -819,7 +819,9 @@ The following command extracts elevation values from `srtm` and assigns the resu
 
 ```{r 05-geometry-operations-47}
 data("zion_points", package = "spDataLarge")
+zion_points %>% class
 zion_points$elevation = raster::extract(srtm, zion_points)
+zion_points
 ```
 
 ```{r 05-geometry-operations-48, echo=FALSE, eval=FALSE}
@@ -1014,6 +1016,8 @@ To demonstrate rasterization in action, we will use a template raster that has t
 
 ```{r 05-geometry-operations-57}
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, 27700)
+cycle_hire_osm_projected
+extent(cycle_hire_osm_projected)
 raster_template = raster(extent(cycle_hire_osm_projected), resolution = 1000,
                          crs = st_crs(cycle_hire_osm_projected)$proj4string)
 ```
@@ -1114,6 +1118,7 @@ Setting the `spatial` parameter to `TRUE` ensures the output is a spatial object
 ```{r 05-geometry-operations-65}
 elev_point = rasterToPoints(elev, spatial = TRUE) %>% 
   st_as_sf()
+rasterToPoints(elev)
 ```
 
 ```{r raster-vectorization1, echo=FALSE, fig.cap="Raster and point representation of the elev object.", warning=FALSE}
@@ -1179,6 +1184,7 @@ Attributes in this case are stored in a column called `layer` (see Section \@ref
 ```{r 05-geometry-operations-67}
 grain_poly = rasterToPolygons(grain) %>% 
   st_as_sf()
+st_geometry(grain_poly)
 grain_poly2 = grain_poly %>% 
   group_by(layer) %>%
   summarize()
