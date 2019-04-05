@@ -668,10 +668,11 @@ For multi-layer raster objects another way to subset is with `raster::subset()`,
 ```{r 03-attribute-operations-59, eval = FALSE}
 r_stack = stack(elev, grain)
 names(r_stack) = c("elev", "grain")
-# three ways to extract a layer of a stack
+# FOUR ways to extract a layer of a stack
 raster::subset(r_stack, "elev")
 r_stack[["elev"]]
 r_stack$elev
+raster(r_stack, layer=1)
 ``` 
 
 Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
